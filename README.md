@@ -24,3 +24,9 @@ self-contained 3D scene playback works here.
 The deploy workflow only runs on demand - trigger it from the
 [Actions tab](../../actions/workflows/deploy.yml) ("Run workflow") whenever
 `cram_viz`'s frontend or the scene bundles change.
+
+`cram_viz` has not been merged into `cognitive_robot_abstract_machine`'s
+`main` branch yet, so the workflow's `source_ref` input defaults to
+`warehouse-viz-features` (the branch it currently lives on). Once it lands
+on `main`, pass `source_ref: main` when running the workflow, or change the
+default in `.github/workflows/deploy.yml`.

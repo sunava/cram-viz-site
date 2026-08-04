@@ -1,7 +1,12 @@
 name: Deploy cram-viz (Recorded mode)
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 'Branch/ref of cognitive_robot_abstract_machine to pull cram_viz from (it is not on main yet)'
+        required: false
+        default: warehouse-viz-features
 
 permissions:
   contents: read
@@ -26,6 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sunava/cognitive_robot_abstract_machine
+          ref: ${{ github.event.inputs.source_ref || 'warehouse-viz-features' }}
           sparse-checkout: |
             cram_viz/src/cram_viz/web
           path: cram_viz_source
