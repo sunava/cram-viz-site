@@ -1,0 +1,60 @@
+name: Deploy cram-viz (Recorded mode)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout cram_viz frontend from cognitive_robot_abstract_machine
+        uses: actions/checkout@v4
+        with:
+          repository: sunava/cognitive_robot_abstract_machine
+          sparse-checkout: |
+            cram_viz/src/cram_viz/web
+          path: cram_viz_source
+
+      - name: Checkout demo scenes from cram-scenes
+        uses: actions/checkout@v4
+        with:
+          repository: sunava/cram-scenes
+          path: cram_scenes_source
+
+      - name: Assemble the static site
+        run: |
+          set -euo pipefail
+          mkdir -p site/scenes
+          cp -r cram_viz_source/cram_viz/src/cram_viz/web/. site/
+          cp -r cram_scenes_source/. site/scenes/
+          rm -rf site/scenes/.git
+
+      - name: Repair the scenes index
+        run: python3 scripts/repair_scene_index.py site/scenes/index.json
+
+      - name: Set up Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
